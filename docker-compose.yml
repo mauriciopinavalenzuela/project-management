@@ -1,0 +1,31 @@
+services:
+  api:
+    image: "node:18" # Versión explícita de Node.js
+    command: "npm run start:dev"
+    user: root
+    working_dir: /home/node/nest
+    environment:
+      - PUERTO_NESTJS=${PUERTO_NESTJS}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT} # Ahora apuntará al puerto interno de MySQL
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+    ports:
+      - "6001:${PUERTO_NESTJS}" # Puerto externo para NestJS
+    volumes:
+      - .:/home/node/nest
+    depends_on:
+      - db
+
+  db:
+    image: "mysql:8.0" # Versión explícita de MySQL
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+    volumes:
+      - .mysql_data:/var/lib/mysql
+      - ./database/project_management.sql:/docker-entrypoint-initdb.d/project_management.sql
+    ports:
+      - "6002:3306" # Externo:Interno
